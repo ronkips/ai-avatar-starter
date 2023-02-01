@@ -5,9 +5,34 @@ import twitterLogo from "../assets/twitter.webp";
 
 const Home = () => {
   const [input, setInput] = useState("");
+  const [img, setImg] = useState("");
 
   const handleChange = (event) => {
     setInput(event.target.value);
+  };
+  //generation action
+  const generateAction = async () => {
+    console.log("Generating ...");
+    //adding fetching request
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "image/jpeg"
+      },
+      body: JSON.stringify({ input })
+    });
+    const data = await response.json();
+    // If model still loading, drop that retry time
+    if (response.status === 503) {
+      console.log("Model is loading still :(.");
+      return;
+    }
+    // if there is another drop the error
+    if (!response.ok) {
+      console.log(`Eror: ${data.error}`);
+    }
+    // Set image data into state property
+    setImg(data.image);
   };
   return (
     <div className="root">
@@ -30,7 +55,7 @@ const Home = () => {
               onChange={handleChange}
             />
             <div className="prompt-buttons">
-              <a className="generate-button">
+              <a className="generate-button" onClick={generateAction}>
                 <div className="generate">
                   <p>Generate</p>
                 </div>
